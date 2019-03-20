@@ -77,6 +77,14 @@ namespace StudentExercises_v604
             }
 
             Pause();
+            repository.AddStudentExercise(2, 2);
+            List<StudentExercise> AllStudentExercises = repository.GetStudentExercises();
+            Console.WriteLine("All Student Exercises");
+            foreach (StudentExercise se in AllStudentExercises)
+            {
+                Console.WriteLine($"{se.Student.FirstName} {se.Student.LastName} is working on {se.Exercise.Name}");
+            }
+            Pause();
         }
         public static void Pause()
         {

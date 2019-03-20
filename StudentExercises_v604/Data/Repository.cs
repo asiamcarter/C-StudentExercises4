@@ -137,65 +137,37 @@ namespace StudentExercises_v604.Data
         }
 
         //Find all instructors in the database.Include each instructor's cohort.
-
-
-
         public List<Instructor> GetInstructorsWithCohort()
-
         {
-
             using (SqlConnection conn = Connection)
-
             {
-
                 conn.Open();
-
                 using (SqlCommand cmd = conn.CreateCommand())
-
                 {
-
                     cmd.CommandText = @"SELECT Instructor.Id, Instructor.FirstName, Instructor.LastName, Cohort.Id as CohortId, Cohort.Name as CohortName FROM Instructor
-
                     LEFT JOIN Cohort ON Instructor.CohortId = Cohort.Id";
-
                     SqlDataReader reader = cmd.ExecuteReader();
-
                     List<Instructor> Instructors = new List<Instructor>();
-
                     while (reader.Read())
                     {
-
                         int InstructorIdPosition = reader.GetOrdinal("Id");
-
                         int InstructorIdValue = reader.GetInt32(InstructorIdPosition);
-
                         int InstructorFirstNamePosition = reader.GetOrdinal("FirstName");
-
                         string InstructorFirstNameValue = reader.GetString(InstructorFirstNamePosition);
-
                         int InstructorLastNamePosition = reader.GetOrdinal("LastName");
-
                         string InstructorLastNameValue = reader.GetString(InstructorLastNamePosition);
-
                         int CohortIdPosition = reader.GetOrdinal("CohortId");
-
                         int CohortIdValue = reader.GetInt32(CohortIdPosition);
-
                         int CohortNamePosition = reader.GetOrdinal("CohortName");
-
                         string CohortNameValue = reader.GetString(CohortNamePosition);
 
                         Cohort cohort = new Cohort
-
                         {
-
                             Id = CohortIdValue,
                             Name = CohortNameValue
-
                         };
 
                         Instructor instructor = new Instructor
-
                         {
                             Id = InstructorIdValue,
                             FirstName = InstructorFirstNameValue,
@@ -205,51 +177,113 @@ namespace StudentExercises_v604.Data
                         };
 
                         Instructors.Add(instructor);
-
                     }
-
                     reader.Close();
-
                     return Instructors;
-
                 }
-
             }
-
         }
 
         //Insert a new instructor into the database.Assign the instructor to an existing cohort.
 
         public void AddInstructor(Instructor instructor)
-
         {
-
             using (SqlConnection conn = Connection)
-
             {
-
                 conn.Open();
-
                 using (SqlCommand cmd = conn.CreateCommand())
-
                 {
-
                     cmd.CommandText = $@"INSERT INTO Instructor(FirstName,LastName,SlackHandle,CohortId) Values(@FirstName, @LastName, @SlackHandle, @CohortId)";
 
                     cmd.Parameters.Add(new SqlParameter("@FirstName", instructor.FirstName));
-
                     cmd.Parameters.Add(new SqlParameter("@LastName", instructor.LastName));
-
                     cmd.Parameters.Add(new SqlParameter("@SlackHandle", instructor.SlackHandle));
-
                     cmd.Parameters.Add(new SqlParameter("@CohortId", instructor.CohortId));
 
                     cmd.ExecuteNonQuery();
-
-                }
-
+                }           
             }
+        }
+        //Assign an existing exercise to an existing student.
+        public void AddStudentExercise(int studentId, int exerciseId)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = $@"INSERT INTO StudentExercise(StudentId, ExerciseId) Values(@studentId, @exerciseId)";
+                    cmd.Parameters.Add(new SqlParameter("@studentId", studentId));
+                    cmd.Parameters.Add(new SqlParameter("@exerciseId", exerciseId));
 
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+        public List<StudentExercise> GetStudentExercises()
+        {
+            
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"SELECT se.Id as StudentExerciseId, StudentId, ExerciseId, s.FirstName, s.LastName, s.SlackHandle, s.CohortId,
+                    e.Name as ExerciseName, e.Language FROM StudentExercise  as se LEFT JOIN Student as s ON se.StudentId = s.Id JOIN Exercise as e  ON se.ExerciseId = e.Id;";
+                        SqlDataReader reader = cmd.ExecuteReader();
+                        List<StudentExercise> StudentExercises = new List<StudentExercise>();
+                        while (reader.Read())
+                        {
+                        int StudentExerciseIdPosition = reader.GetOrdinal("StudentExerciseId");
+                        int StudentExerciseIdValue = reader.GetInt32(StudentExerciseIdPosition);
+                            int StudentIdPosition = reader.GetOrdinal("StudentId");
+                            int StudentIdValue = reader.GetInt32(StudentIdPosition);
+                            int ExerciseIdPosition = reader.GetOrdinal("ExerciseId");
+                            int ExerciseIdValue = reader.GetInt32(ExerciseIdPosition);
+                            int StudentFirstNamePosition = reader.GetOrdinal("FirstName");
+                            string StudentFirstNameValue = reader.GetString(StudentFirstNamePosition);
+                            int StudentLastNamePosition = reader.GetOrdinal("LastName");
+                            string StudentLastNameValue = reader.GetString(StudentLastNamePosition);
+                            int SlackHandlePosition = reader.GetOrdinal("SlackHandle");
+                            string SlackHandleValue = reader.GetString(SlackHandlePosition);
+                            int CohortIdPosition = reader.GetOrdinal("CohortId");
+                            int CohortIdValue = reader.GetInt32(CohortIdPosition);
+                            int ExerciseNamePosition = reader.GetOrdinal("ExerciseName");
+                            string ExerciseNameValue = reader.GetString(ExerciseNamePosition);
+                            int ExerciseLanguagePosition = reader.GetOrdinal("Language");
+                            string ExerciseLanguageValue = reader.GetString(ExerciseLanguagePosition);
+                   
+                           Exercise exercise = new Exercise
+                            {
+                                Id = ExerciseIdValue,
+                                Name = ExerciseNameValue,
+                                Language = ExerciseLanguageValue
+                           };
+
+                            Student Student = new Student
+                            {
+                                Id = StudentIdValue,
+                                FirstName = StudentFirstNameValue,
+                                LastName = StudentLastNameValue,
+                                SlackHandle = SlackHandleValue,
+                                CohortId = CohortIdValue
+                            };
+
+                        StudentExercise studentExercise = new StudentExercise
+                        {
+                            Id = StudentExerciseIdValue,
+                            StudentId = StudentIdValue,
+                            Student = Student,
+                            ExerciseId = ExerciseIdValue,
+                            Exercise = exercise
+                        };
+
+                        StudentExercises.Add(studentExercise);
+                        }
+                        reader.Close();
+                        return StudentExercises;
+                    }
+                }
         }
     }
 }
